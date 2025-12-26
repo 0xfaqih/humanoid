@@ -1,0 +1,23 @@
+{
+  "name": "humanoid",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "chalk": "^5.6.2",
+    "dotenv": "^16.6.1",
+    "ethers": "^6.16.0",
+    "https-proxy-agent": "^7.0.6",
+    "recaptcha-v2-solver": "^1.0.2",
+    "socks-proxy-agent": "^8.0.5",
+    "user-agents": "^1.1.669"
+  }
+}
