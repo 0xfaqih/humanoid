@@ -14,8 +14,11 @@ export const retry = async (fn, maxRetries = 3, baseDelay = 1000) => {
         error.message?.includes("ECONNRESET") ||
         error.message?.includes("ETIMEDOUT") ||
         error.message?.includes("network socket disconnected") ||
+        error.message?.includes("TLS connection") ||
+        error.message?.includes("socket disconnected") ||
         error.code === "ECONNRESET" ||
-        error.code === "ETIMEDOUT";
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNREFUSED";
 
       if (attempt < maxRetries && isNetworkError) {
         const waitTime = baseDelay * Math.pow(2, attempt - 1);

@@ -9,6 +9,7 @@ import { question, close } from "./utils/input.js";
 import { shuffleArray, randomDelay } from "./utils/random.js";
 import { scheduleDaily } from "./utils/scheduler.js";
 import { countdown } from "./utils/countdown.js";
+import { retry } from "./utils/retry.js";
 
 const runTasks = async () => {
   try {
@@ -37,24 +38,69 @@ const runTasks = async () => {
             walletAddress
           );
 
-          const modelId = await HuggingFaceService.getRandomModel();
-          if (!modelId) {
-            Logger.error("Cannot get model, skipping...");
-            break;
+          let modelSubmitted = false;
+          let retryCount = 0;
+          const maxModelRetries = 5;
+
+          while (!modelSubmitted && retryCount < maxModelRetries) {
+            retryCount++;
+            const modelId = await HuggingFaceService.getRandomModel();
+            if (!modelId) {
+              Logger.error("Cannot get model, skipping...");
+              break;
+            }
+
+            try {
+              const captcha = "";
+              const model = await retry(
+                async () => {
+                  return await HumanoidService.submitModel(
+                    walletAddress,
+                    token,
+                    modelId,
+                    captcha
+                  );
+                },
+                3,
+                2000
+              );
+
+              if (model?.verified) {
+                Logger.success(`Model ${model.fileName} submitted successfully`);
+                modelSubmitted = true;
+              } else {
+                Logger.warning(`Model ${model?.fileName ?? "(unknown)"} submission failed`);
+                modelSubmitted = true;
+              }
+            } catch (error) {
+              if (error.message === "INVALID_URL") {
+                Logger.warning(`Invalid model URL, trying another model... (${retryCount}/${maxModelRetries})`);
+                await delay(1000);
+                continue;
+              }
+              
+              const isNetworkError = 
+                error.message?.includes("socket hang up") ||
+                error.message?.includes("ECONNRESET") ||
+                error.message?.includes("ETIMEDOUT") ||
+                error.message?.includes("network socket disconnected") ||
+                error.message?.includes("TLS connection") ||
+                error.code === "ECONNRESET" ||
+                error.code === "ETIMEDOUT";
+
+              if (isNetworkError && retryCount < maxModelRetries) {
+                Logger.warning(`Network error, trying another model... (${retryCount}/${maxModelRetries})`);
+                await delay(2000);
+                continue;
+              }
+
+              throw error;
+            }
           }
 
-          const captcha = "";
-          const model = await HumanoidService.submitModel(
-            walletAddress,
-            token,
-            modelId,
-            captcha
-          );
-
-          if (model?.verified) {
-            Logger.success(`Model ${model.fileName} submitted successfully`);
-          } else {
-            Logger.warning(`Model ${model?.fileName ?? "(unknown)"} submission failed`);
+          if (!modelSubmitted) {
+            Logger.error("Failed to submit model after multiple attempts with different models");
+            break;
           }
 
           await delay(2000);
@@ -76,24 +122,69 @@ const runTasks = async () => {
             walletAddress
           );
 
-          const datasetId = await HuggingFaceService.getRandomDataset();
-          if (!datasetId) {
-            Logger.error("Cannot get dataset, skipping...");
-            break;
+          let datasetSubmitted = false;
+          let retryCount = 0;
+          const maxDatasetRetries = 5;
+
+          while (!datasetSubmitted && retryCount < maxDatasetRetries) {
+            retryCount++;
+            const datasetId = await HuggingFaceService.getRandomDataset();
+            if (!datasetId) {
+              Logger.error("Cannot get dataset, skipping...");
+              break;
+            }
+
+            try {
+              const captcha = "";
+              const dataset = await retry(
+                async () => {
+                  return await HumanoidService.submitDataset(
+                    walletAddress,
+                    token,
+                    datasetId,
+                    captcha
+                  );
+                },
+                3,
+                2000
+              );
+
+              if (dataset?.verified) {
+                Logger.success(`Dataset ${dataset.fileName} submitted successfully`);
+                datasetSubmitted = true;
+              } else {
+                Logger.warning(`Dataset ${dataset?.fileName ?? "(unknown)"} submission failed`);
+                datasetSubmitted = true;
+              }
+            } catch (error) {
+              if (error.message === "INVALID_URL") {
+                Logger.warning(`Invalid dataset URL, trying another dataset... (${retryCount}/${maxDatasetRetries})`);
+                await delay(1000);
+                continue;
+              }
+              
+              const isNetworkError = 
+                error.message?.includes("socket hang up") ||
+                error.message?.includes("ECONNRESET") ||
+                error.message?.includes("ETIMEDOUT") ||
+                error.message?.includes("network socket disconnected") ||
+                error.message?.includes("TLS connection") ||
+                error.code === "ECONNRESET" ||
+                error.code === "ETIMEDOUT";
+
+              if (isNetworkError && retryCount < maxDatasetRetries) {
+                Logger.warning(`Network error, trying another dataset... (${retryCount}/${maxDatasetRetries})`);
+                await delay(2000);
+                continue;
+              }
+
+              throw error;
+            }
           }
 
-          const captcha = "";
-          const dataset = await HumanoidService.submitDataset(
-            walletAddress,
-            token,
-            datasetId,
-            captcha
-          );
-
-          if (dataset?.verified) {
-            Logger.success(`Dataset ${dataset.fileName} submitted successfully`);
-          } else {
-            Logger.warning(`Dataset ${dataset?.fileName ?? "(unknown)"} submission failed`);
+          if (!datasetSubmitted) {
+            Logger.error("Failed to submit dataset after multiple attempts with different datasets");
+            break;
           }
 
           await delay(2000);

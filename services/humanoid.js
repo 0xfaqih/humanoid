@@ -169,6 +169,13 @@ class HumanoidService {
           continue;
         }
 
+        if (status === 400 && errorMessage?.toLowerCase().includes("invalid huggingface url")) {
+          Logger.warning(`Submit model 400 error: ${errorMessage || err.message}`);
+          Logger.warning(`URL sent: ${fileUrl}`);
+          Logger.warning("Skipping this model and trying a new one...");
+          throw new Error("INVALID_URL");
+        }
+
         if (status === 400) {
           Logger.warning(`Submit model 400 error: ${errorMessage || err.message}`);
           Logger.warning(`URL sent: ${fileUrl}`);
@@ -217,6 +224,13 @@ class HumanoidService {
             `Dataset already submitted, retrying (${attempt}/${maxRetry})...`
           );
           continue;
+        }
+
+        if (status === 400 && errorMessage?.toLowerCase().includes("invalid huggingface url")) {
+          Logger.warning(`Submit dataset 400 error: ${errorMessage || err.message}`);
+          Logger.warning(`URL sent: ${fileUrl}`);
+          Logger.warning("Skipping this dataset and trying a new one...");
+          throw new Error("INVALID_URL");
         }
 
         if (status === 400) {
