@@ -291,9 +291,13 @@ const main = async () => {
       Logger.info("\n🔄 Running in daily schedule mode (00:00-02:00 UTC)");
       Logger.info("Bot will run daily and repeat after all wallets are processed\n");
       
+      close();
+      
       scheduleDaily(async () => {
         await runTasks();
       }, 0, 2);
+      
+      Logger.info("Bot is running in the background. Press Ctrl+C to stop.\n");
     } else {
       Logger.error("Invalid choice");
       close();
