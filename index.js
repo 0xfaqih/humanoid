@@ -210,7 +210,7 @@ const runTasks = async () => {
         }
 
         if (i < walletAddresses.length - 1) {
-          const waitSeconds = Math.floor(randomDelay(30, 600) / 1000);
+          const waitSeconds = Math.floor(randomDelay(30, 60) / 1000);
           await countdown(waitSeconds);
         }
       } catch (error) {
