@@ -163,10 +163,9 @@ class HumanoidService {
         const status = err?.response?.status;
 
         if (status === 400 && errorMessage === "You have already submitted this URL") {
-          Logger.warning(
-            `Model already submitted, retrying (${attempt}/${maxRetry})...`
-          );
-          continue;
+          Logger.warning(`Model already submitted: ${fileUrl}`);
+          Logger.warning("Skipping this model and trying a new one...");
+          throw new Error("ALREADY_SUBMITTED");
         }
 
         if (status === 400 && errorMessage?.toLowerCase().includes("invalid huggingface url")) {
@@ -220,10 +219,9 @@ class HumanoidService {
         const status = err?.response?.status;
 
         if (status === 400 && errorMessage === "You have already submitted this URL") {
-          Logger.warning(
-            `Dataset already submitted, retrying (${attempt}/${maxRetry})...`
-          );
-          continue;
+          Logger.warning(`Dataset already submitted: ${fileUrl}`);
+          Logger.warning("Skipping this dataset and trying a new one...");
+          throw new Error("ALREADY_SUBMITTED");
         }
 
         if (status === 400 && errorMessage?.toLowerCase().includes("invalid huggingface url")) {

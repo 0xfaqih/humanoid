@@ -73,8 +73,9 @@ const runTasks = async () => {
                 modelSubmitted = true;
               }
             } catch (error) {
-              if (error.message === "INVALID_URL") {
-                Logger.warning(`Invalid model URL, trying another model... (${retryCount}/${maxModelRetries})`);
+              if (error.message === "INVALID_URL" || error.message === "ALREADY_SUBMITTED") {
+                const errorType = error.message === "INVALID_URL" ? "Invalid model URL" : "Model already submitted";
+                Logger.warning(`${errorType}, trying another model... (${retryCount}/${maxModelRetries})`);
                 await delay(1000);
                 continue;
               }
@@ -157,8 +158,9 @@ const runTasks = async () => {
                 datasetSubmitted = true;
               }
             } catch (error) {
-              if (error.message === "INVALID_URL") {
-                Logger.warning(`Invalid dataset URL, trying another dataset... (${retryCount}/${maxDatasetRetries})`);
+              if (error.message === "INVALID_URL" || error.message === "ALREADY_SUBMITTED") {
+                const errorType = error.message === "INVALID_URL" ? "Invalid dataset URL" : "Dataset already submitted";
+                Logger.warning(`${errorType}, trying another dataset... (${retryCount}/${maxDatasetRetries})`);
                 await delay(1000);
                 continue;
               }
